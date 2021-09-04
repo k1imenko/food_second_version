@@ -96,8 +96,7 @@ window.addEventListener('DOMContentLoaded', () => {
     //Модальные окна
 
     const modalTrigger = document.querySelectorAll('[data-modal]'), //обращаемся по назначенному в верстке аттрибуту
-        modal = document.querySelector('.modal'),
-        modalCloseBtn = document.querySelector('[data-close]');
+        modal = document.querySelector('.modal');
 
     function openModal() {
         modal.classList.add('show');
@@ -116,10 +115,8 @@ window.addEventListener('DOMContentLoaded', () => {
         document.body.style.overflow = '';
     }
 
-    modalCloseBtn.addEventListener('click', closeModal);
-
     modal.addEventListener('click', (e) => { //закрываем модальное окно по клику в пустую область
-        if (e.target === modal) {
+        if (e.target === modal || e.target.getAttribute('data-close') == '') {
             closeModal();
         }
     });
@@ -130,7 +127,7 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    const modalTimerId = setTimeout(openModal, 5000); //вызываем модальное окно через определенное время
+    const modalTimerId = setTimeout(openModal, 50000); //вызываем модальное окно через определенное время
 
     function showModalByScroll() { //при пролистывании страницы до конца будет показываться модальное окно
         if (window.pageYOffset + document.documentElement.clientHeight >= document.documentElement.scrollHeight) {
@@ -140,4 +137,147 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     window.addEventListener('scroll', showModalByScroll);
+
+    //Используем классы для карточек
+
+    class Card {
+        constructor(src, alt, title, descr, price, parentSelector, ...classes) { //задаем в качестве аргументов. то из чего состоит карточка
+            this.src = src;
+            this.alt = alt;
+            this.title = title;
+            this.descr = descr;
+            this.price = price;
+            this.classes = classes;
+            this.parent = document.querySelector(parentSelector);
+            this.transfer = 27; //обменный курс для метода changetToUAH()
+            this.changetToUAH();
+        }
+
+        changetToUAH() { //метод конвертации валюты
+            this.price = this.price * this.transfer;
+        }
+
+        render() { //задаем верстку
+            const element = document.createElement('div'); //оборачиваем всю структуру карточки в один div
+            if (this.classes.length === 0) {
+                this.element = 'menu__item';
+                element.classList.add(this.element);
+            } else {
+                this.classes.forEach(className => element.classList.add(className));
+            }
+
+            element.innerHTML = `
+                <img src=${this.src} alt=${this.alt}>
+                <h3 class=${this.title}>Меню “Премиум”</h3>
+                <div class="menu__item-descr">${this.descr}</div>
+                <div class="menu__item-divider"></div>
+                <div class="menu__item-price">
+                    <div class="menu__item-cost">Цена:</div>
+                    <div class="menu__item-total"><span>${this.price}</span> грн/день</div>
+                </div>
+            `;
+            this.parent.append(element);
+        }
+    }
+
+    new Card(
+        "img/tabs/vegy.jpg",
+        "vegy",
+        'Меню "Фитнес"',
+        'Меню "Фитнес" - это новый подход к приготовлению блюд: больше свежих овощей и фруктов. Продукт активных и здоровых людей. Это абсолютно новый продукт с оптимальной ценой и высоким качеством!',
+        9,
+        '.menu .container', //сюда будут пушиться динамически созданные элементы верстки 
+    ).render();
+    new Card(
+        "img/tabs/elite.jpg",
+        "elite",
+        'Меню "“Премиум”"',
+        'В меню “Премиум” мы используем не только красивый дизайн упаковки, но и качественное исполнение блюд. Красная рыба, морепродукты, фрукты - ресторанное меню без похода в ресторан!',
+        14,
+        '.menu .container' //сюда будут пушиться динамически созданные элементы верстки
+    ).render();
+    new Card(
+        "img/tabs/post.jpg",
+        "post",
+        'Меню "Постное"',
+        'Меню “Постное” - это тщательный подбор ингредиентов: полное отсутствие продуктов животного происхождения, молоко из миндаля, овса, кокоса или гречки, правильное количество белков за счет тофу и импортных вегетарианских стейков.',
+        21,
+        '.menu .container' //сюда будут пушиться динамически созданные элементы верстки
+    ).render();
+
+    //Создание формы
+
+    const forms = document.querySelectorAll('form');
+    const message = {
+        loading: 'img/form/spinner.svg',
+        success: 'Спасибо! Скоро мы с вами свяжемся',
+        failure: 'Что-то пошло не так...'
+    };
+
+    forms.forEach(item => { //подвязываем на каждую form функцию postDatа, которая будет обработчиком события при отправке 
+        postData(item);
+    });
+
+    function postData(form) { //функция отправки 
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const statusMessage = document.createElement('img');
+            statusMessage.src = message.loading;
+            statusMessage.style.cssText = `
+                display: block;
+                margin: 0 auto;
+            `; //выводим пользователю сообщение   
+            // form.append(statusMessage);
+            form.insertAdjacentElement('afterend', statusMessage);
+
+            const request = new XMLHttpRequest(); //отправляем данные без перезагрузки страницы с помощью XMLHttpRequest 
+            request.open('POST', 'server.php'); //исп метод POST и ссылаемся на файл server.php
+
+            request.setRequestHeader('Content-type', 'application/json'); //при исп XMLHttpRequest и FormData заголовок устанавливать не нужно, он устанавливается автоматически 
+            const formData = new FormData(form); //формируем данные которые заполнил пользователь
+
+            const obj = {}; //создаем пустой обьект
+            formData.forEach(function(value, key) { //необходимо превратить FormData в формат JSON, с помощью forEach переберем formData и все данные поместим в obj
+                obj[key] = value;
+            });
+            const json = JSON.stringify(obj); //превращаем обычный обьект в JSON при помощи stringify()
+            request.send(json);
+
+            request.addEventListener('load', () => { //добавляем обработчик события и отслеживаем загрузку(load)
+                if (request.status === 200) { //если наш запрос выполнен успешно(значение 200)
+                    console.log(request.response);
+                    showThanksModal(message.success);
+                    form.reset(); //очищаем инпуты модального окна после отправки данных
+                    statusMessage.remove(); //удаляем со страницы блок с сообщением об отправке 
+                } else {
+                    showThanksModal(message.failure);
+                }
+            });
+        });
+    }
+
+    function showThanksModal(message) { //создаем окно с благодарность после отправки формы
+        const previousModalDialog = document.querySelector('.modal__dialog');
+
+        previousModalDialog.classList.add('hide');
+        openModal();
+
+        const thanksModal = document.createElement('div');
+        thanksModal.classList.add('modal__dialog');
+        thanksModal.innerHTML = `
+            <div class="modal__content">
+                <div class="modal__close" data-close>×</div>
+                <div class="modal__title">${message}</div>
+            </div>
+        `;
+
+        document.querySelector('.modal').append(thanksModal);
+        setTimeout(() => {
+            thanksModal.remove();
+            previousModalDialog.classList.add('show');
+            previousModalDialog.classList.remove('hide');
+            closeModal();
+        }, 4000);
+    }
 });
