@@ -167,43 +167,58 @@ window.addEventListener('DOMContentLoaded', () => {
             }
 
             element.innerHTML = `
-                <img src=${this.src} alt=${this.alt}>
-                <h3 class=${this.title}>Меню “Премиум”</h3>
-                <div class="menu__item-descr">${this.descr}</div>
-                <div class="menu__item-divider"></div>
-                <div class="menu__item-price">
-                    <div class="menu__item-cost">Цена:</div>
-                    <div class="menu__item-total"><span>${this.price}</span> грн/день</div>
-                </div>
-            `;
+            <img src=${this.src} alt=${this.alt}>
+            <h3 class=${this.title}>Меню “Премиум”</h3>
+            <div class="menu__item-descr">${this.descr}</div>
+            <div class="menu__item-divider"></div>
+            <div class="menu__item-price">
+                <div class="menu__item-cost">Цена:</div>
+                <div class="menu__item-total"><span>${this.price}</span> грн/день</div>
+            </div>
+        `;
             this.parent.append(element);
         }
     }
 
-    new Card(
-        "img/tabs/vegy.jpg",
-        "vegy",
-        'Меню "Фитнес"',
-        'Меню "Фитнес" - это новый подход к приготовлению блюд: больше свежих овощей и фруктов. Продукт активных и здоровых людей. Это абсолютно новый продукт с оптимальной ценой и высоким качеством!',
-        9,
-        '.menu .container', //сюда будут пушиться динамически созданные элементы верстки 
-    ).render();
-    new Card(
-        "img/tabs/elite.jpg",
-        "elite",
-        'Меню "“Премиум”"',
-        'В меню “Премиум” мы используем не только красивый дизайн упаковки, но и качественное исполнение блюд. Красная рыба, морепродукты, фрукты - ресторанное меню без похода в ресторан!',
-        14,
-        '.menu .container' //сюда будут пушиться динамически созданные элементы верстки
-    ).render();
-    new Card(
-        "img/tabs/post.jpg",
-        "post",
-        'Меню "Постное"',
-        'Меню “Постное” - это тщательный подбор ингредиентов: полное отсутствие продуктов животного происхождения, молоко из миндаля, овса, кокоса или гречки, правильное количество белков за счет тофу и импортных вегетарианских стейков.',
-        21,
-        '.menu .container' //сюда будут пушиться динамически созданные элементы верстки
-    ).render();
+    const getResource = async(url) => {
+        const res = await fetch(url);
+        if (!res.ok) {
+            throw new Error(`Could not fetch ${url}, status: ${res.status}`);
+        }
+        return await res.json();
+    };
+
+    getResource('http://localhost:3000/menu')
+        .then(data => { //сокращенное написание нижеслед кода
+            data.forEach(({ img, altimg, title, descr, price }) => {
+                new Card(img, altimg, title, descr, price, '.menu .container').render();
+            });
+        });
+
+    // new Card(
+    //     "img/tabs/vegy.jpg",
+    //     "vegy",
+    //     'Меню "Фитнес"',
+    //     'Меню "Фитнес" - это новый подход к приготовлению блюд: больше свежих овощей и фруктов. Продукт активных и здоровых людей. Это абсолютно новый продукт с оптимальной ценой и высоким качеством!',
+    //     9,
+    //     '.menu .container', //сюда будут пушиться динамически созданные элементы верстки 
+    // ).render();
+    // new Card(
+    //     "img/tabs/elite.jpg",
+    //     "elite",
+    //     'Меню "“Премиум”"',
+    //     'В меню “Премиум” мы используем не только красивый дизайн упаковки, но и качественное исполнение блюд. Красная рыба, морепродукты, фрукты - ресторанное меню без похода в ресторан!',
+    //     14,
+    //     '.menu .container' //сюда будут пушиться динамически созданные элементы верстки
+    // ).render();
+    // new Card(
+    //     "img/tabs/post.jpg",
+    //     "post",
+    //     'Меню "Постное"',
+    //     'Меню “Постное” - это тщательный подбор ингредиентов: полное отсутствие продуктов животного происхождения, молоко из миндаля, овса, кокоса или гречки, правильное количество белков за счет тофу и импортных вегетарианских стейков.',
+    //     21,
+    //     '.menu .container' //сюда будут пушиться динамически созданные элементы верстки
+    // ).render();
 
     //Создание формы
 
@@ -215,45 +230,56 @@ window.addEventListener('DOMContentLoaded', () => {
     };
 
     forms.forEach(item => { //подвязываем на каждую form функцию postDatа, которая будет обработчиком события при отправке 
-        postData(item);
+        bindPostData(item);
     });
 
-    function postData(form) { //функция отправки 
+    const postData = async(url, data) => {
+        const res = await fetch(url, {
+            method: "POST",
+            headers: {
+                'Content-type': 'application/json'
+            },
+            body: data
+        });
+        return await res.json();
+    };
+
+    function bindPostData(form) { //функция отправки 
         form.addEventListener('submit', (e) => {
             e.preventDefault();
 
             const statusMessage = document.createElement('img');
             statusMessage.src = message.loading;
             statusMessage.style.cssText = `
-                display: block;
-                margin: 0 auto;
-            `; //выводим пользователю сообщение   
+            display: block;
+            margin: 0 auto;
+        `; //выводим пользователю сообщение   
             // form.append(statusMessage);
             form.insertAdjacentElement('afterend', statusMessage);
 
-            const request = new XMLHttpRequest(); //отправляем данные без перезагрузки страницы с помощью XMLHttpRequest 
-            request.open('POST', 'server.php'); //исп метод POST и ссылаемся на файл server.php
+            const formData = new FormData(form);
+            const json = JSON.stringify(Object.fromEntries(formData.entries()));
 
-            request.setRequestHeader('Content-type', 'application/json'); //при исп XMLHttpRequest и FormData заголовок устанавливать не нужно, он устанавливается автоматически 
-            const formData = new FormData(form); //формируем данные которые заполнил пользователь
+            // const request = new XMLHttpRequest(); //отправляем данные без перезагрузки страницы с помощью XMLHttpRequest 
+            // request.open('POST', 'server.php'); //исп метод POST и ссылаемся на файл server.php
 
             const obj = {}; //создаем пустой обьект
             formData.forEach(function(value, key) { //необходимо превратить FormData в формат JSON, с помощью forEach переберем formData и все данные поместим в obj
                 obj[key] = value;
             });
-            const json = JSON.stringify(obj); //превращаем обычный обьект в JSON при помощи stringify()
-            request.send(json);
 
-            request.addEventListener('load', () => { //добавляем обработчик события и отслеживаем загрузку(load)
-                if (request.status === 200) { //если наш запрос выполнен успешно(значение 200)
-                    console.log(request.response);
+            // const json = JSON.stringify(obj); //превращаем обычный обьект в JSON при помощи stringify()
+
+            postData('http://localhost:3000/requests', json)
+                .then(data => {
+                    console.log(data); //в консоль данные которые вернул сервер
                     showThanksModal(message.success);
-                    form.reset(); //очищаем инпуты модального окна после отправки данных
                     statusMessage.remove(); //удаляем со страницы блок с сообщением об отправке 
-                } else {
+                }).catch(() => {
                     showThanksModal(message.failure);
-                }
-            });
+                }).finally(() => {
+                    form.reset(); //очищаем инпуты модального окна после отправки данных
+                });
         });
     }
 
@@ -266,11 +292,11 @@ window.addEventListener('DOMContentLoaded', () => {
         const thanksModal = document.createElement('div');
         thanksModal.classList.add('modal__dialog');
         thanksModal.innerHTML = `
-            <div class="modal__content">
-                <div class="modal__close" data-close>×</div>
-                <div class="modal__title">${message}</div>
-            </div>
-        `;
+        <div class="modal__content">
+            <div class="modal__close" data-close>×</div>
+            <div class="modal__title">${message}</div>
+        </div>
+    `;
 
         document.querySelector('.modal').append(thanksModal);
         setTimeout(() => {
@@ -280,4 +306,129 @@ window.addEventListener('DOMContentLoaded', () => {
             closeModal();
         }, 4000);
     }
+
+    fetch('http://localhost:3000/menu')
+        .then(data => data.json())
+        .then(res => console.log(res));
+
+
+    //---Слайдер----------------------------
+
+    const slides = document.querySelectorAll('.offer__slide'),
+        prev = document.querySelector('.offer__slider-prev'),
+        next = document.querySelector('.offer__slider-next'),
+        total = document.querySelector('#total'),
+        current = document.querySelector('#current'),
+        slidesWrapper = document.querySelector('.offer__slider-wrapper'), //создаем для второго варианта слайдера
+        slidesField = document.querySelector('.offer__slider-inner'), //создаем для второго варианта слайдера
+        width = window.getComputedStyle(slidesWrapper).width; //создаем для второго варианта слайдера
+
+    let slideIndex = 1; // индекс, кот определяет текущее положение в слайдере
+    let offset = 0;
+
+    if (slides.length < 10) { //меняем индексы при перелистывании изображений(prev)
+        total.textContent = `0${slides.length}`;
+        current.textContent = `0${slideIndex}`;
+    } else {
+        total.textContent = slides.length;
+        current.textContent = slideIndex;
+    }
+
+    //!---первый вариант  ----------
+    showSlides(slideIndex);
+
+    if (slides.length < 10) { //меняем индексы при перелистывании изображений(prev)
+        total.textContent = `0${slides.length}`;
+    } else {
+        total.textContent = slides.length;
+    }
+
+    function showSlides(n) {
+        if (n > slides.length) {
+            slideIndex = 1;
+        }
+
+        if (n < 1) {
+            slideIndex = slides.length;
+        }
+
+        slides.forEach(item => item.style.display = 'none'); //показ первого слайда на странице и скрытие остальных 
+
+        slides[slideIndex - 1].style.display = 'block'; //отображаем пользователю правильный по порядку слайд 
+
+        if (slides.length < 10) { //меняем индексы при перелистывании изображений(next)
+            current.textContent = `0${slideIndex}`;
+        } else {
+            current.textContent = slideIndex;
+        }
+    }
+
+    function plusSlides(n) { //при перелистывании слайдера увеличиваем счетчик на один индекс
+        showSlides(slideIndex += n);
+    }
+
+    prev.addEventListener('click', () => {
+        plusSlides(-1);
+    });
+
+    next.addEventListener('click', () => {
+        plusSlides(1);
+    });
+    //!---------------------------
+
+
+    //!---второй вариант слайдера----------
+
+    // slidesField.style.width = 100 * slides.length + '%'; //устанавливаем ширину блока с изображениями
+    // slidesField.style.display = 'flex';
+    // slidesField.style.transition = '0.5s all';
+
+    // slidesWrapper.style.overflow = 'hidden'; //скрываем все элементы которые не попадают в область видимости(создают полосу прокрутки)
+
+    // slides.forEach(slide => {
+    //     slide.style.width = width;
+    // }); //фиксируем ширину для каждого изображения
+
+    // next.addEventListener('click', () => {
+    //     if (offset == +width.slice(0, width.length - 2) * (slides.length - 1)) { //устанавливаем ширину строки с изобр и переводим в числовой тип данных
+    //         offset = 0;
+    //     } else {
+    //         offset += +width.slice(0, width.length - 2);
+    //     }
+
+    //     slidesField.style.transform = `translateX(-${offset}px)`;
+
+    //     if (slideIndex == slides.length) {
+    //         slideIndex = 1;
+    //     } else {
+    //         slideIndex++;
+    //     }
+
+    //     if (slides.length < 10) {
+    //         current.textContent = `0${slideIndex}`;
+    //     } else {
+    //         current.textContent = slideIndex;
+    //     }
+    // });
+
+    // prev.addEventListener('click', () => {
+    //     if (offset == 0) { //устанавливаем ширину строки с изобр и переводим в числовой тип данных
+    //         offset = +width.slice(0, width.length - 2) * (slides.length - 1);
+    //     } else {
+    //         offset -= +width.slice(0, width.length - 2);
+    //     }
+    //     slidesField.style.transform = `translateX(-${offset}px)`;
+
+    //     if (slideIndex == 1) {
+    //         slideIndex = slides.length;
+    //     } else {
+    //         slideIndex--;
+    //     }
+
+    //     if (slides.length < 10) {
+    //         current.textContent = `0${slideIndex}`;
+    //     } else {
+    //         current.textContent = slideIndex;
+    //     }
+    // });
 });
