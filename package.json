@@ -17,6 +17,9 @@
     },
     "homepage": "https://github.com/k1imenko/food_second_version#readme",
     "devDependencies": {
-        "json-server": "^0.16.3"
-    }
+        "json-server": "^0.16.3",
+        "webpack": "^5.58.2",
+        "webpack-cli": "^4.9.0"
+    },
+    "dependencies": {}
 }
