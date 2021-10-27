@@ -1,17 +1,17 @@
-function slider() {
+function slider({ container, slide, nextArrow, prevArrow, totalCounter, currentCounter, wrapper, field }) {
     //---Слайдер----------------------------
 
     let slideIndex = 1; // индекс, кот определяет текущее положение в слайдере
     let offset = 0;
 
-    const slides = document.querySelectorAll('.offer__slide'),
-        slider = document.querySelector('.offer__slider'),
-        prev = document.querySelector('.offer__slider-prev'),
-        next = document.querySelector('.offer__slider-next'),
-        total = document.querySelector('#total'),
-        current = document.querySelector('#current'),
-        slidesWrapper = document.querySelector('.offer__slider-wrapper'), //создаем для второго варианта слайдера
-        slidesField = document.querySelector('.offer__slider-inner'), //создаем для второго варианта слайдера
+    const slides = document.querySelectorAll(slide),
+        slider = document.querySelector(container),
+        prev = document.querySelector(prevArrow),
+        next = document.querySelector(nextArrow),
+        total = document.querySelector(totalCounter),
+        current = document.querySelector(currentCounter),
+        slidesWrapper = document.querySelector(wrapper), //создаем для второго варианта слайдера
+        slidesField = document.querySelector(field), //создаем для второго варианта слайдера
         width = window.getComputedStyle(slidesWrapper).width; //создаем для второго варианта слайдера
 
     if (slides.length < 10) { //меняем индексы при перелистывании изображений(prev)
@@ -197,4 +197,4 @@ function slider() {
         return +str.replace(/\D/g, '');
     }
 }
-module.exports = slider;
+export default slider;

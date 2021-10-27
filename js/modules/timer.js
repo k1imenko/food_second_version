@@ -1,7 +1,7 @@
-function timer() {
+function timer(id, deadline) {
     //Таймер
 
-    const deadline = '2021-10-20';
+    // const deadline = '2021-10-20';
 
     function getTimeRemaining(endtime) {
         const tech = Date.parse(endtime) - Date.parse(new Date()), //при запуске функции мы получим разницу в миллисекундах между датами
@@ -21,7 +21,7 @@ function timer() {
 
     function getZero(num) { //подставляем ноль в таймер если число в счетчике состоит из одного символа
         if (num >= 0 && num < 10) {
-            return `0${num}`;
+            return '0' + num;
         } else {
             return num;
         }
@@ -51,13 +51,13 @@ function timer() {
         }
     }
 
-    setClock('.timer', deadline);
+    setClock(id, deadline);
 
 
     function showModalByScroll() { //при пролистывании страницы до конца будет показываться модальное окно
         if (window.pageYOffset + document.documentElement.clientHeight >= document.documentElement.scrollHeight) {
             openModal();
-            window.removeEventListener('scroll', showModalByScroll); //когда модальное окно показалось пользователь один раз, больше оно показываться при скролле сайта не будет 
+            window.removeEventListener('scroll', showModalByScroll); //когда модальное окно показалось пользователю один раз, больше оно показываться при скролле сайта не будет 
         }
     }
 
@@ -65,4 +65,4 @@ function timer() {
 
 }
 
-module.exports = timer;
+export default timer;

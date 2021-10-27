@@ -1,15 +1,7 @@
+import { getResource } from '../services/services';
+
 function cards() {
     //Используем классы для карточек
-
-    async function getResource(url) {
-        let res = await fetch(url);
-
-        if (!res.ok) {
-            throw new Error(`Could not fetch ${url}, status: ${res.status}`);
-        }
-
-        return await res.json();
-    }
 
     class Card {
         constructor(src, alt, title, descr, price, parentSelector, ...classes) { //задаем в качестве аргументов. то из чего состоит карточка
@@ -52,35 +44,11 @@ function cards() {
     }
 
     getResource('http://localhost:3000/menu')
-        .then(data => { //сокращенное написание нижеслед кода
-            // new Card(
-            //     "img/tabs/vegy.jpg",
-            //     "vegy",
-            //     'Меню "Фитнес"',
-            //     'Меню "Фитнес" - это новый подход к приготовлению блюд: больше свежих овощей и фруктов. Продукт активных и здоровых людей. Это абсолютно новый продукт с оптимальной ценой и высоким качеством!',
-            //     9,
-            //     '.menu .container', //сюда будут пушиться динамически созданные элементы верстки 
-            // ).render();
-            // new Card(
-            //     "img/tabs/elite.jpg",
-            //     "elite",
-            //     'Меню "“Премиум”"',
-            //     'В меню “Премиум” мы используем не только красивый дизайн упаковки, но и качественное исполнение блюд. Красная рыба, морепродукты, фрукты - ресторанное меню без похода в ресторан!',
-            //     14,
-            //     '.menu .container' //сюда будут пушиться динамически созданные элементы верстки
-            // ).render();
-            // new Card(
-            //     "img/tabs/post.jpg",
-            //     "post",
-            //     'Меню "Постное"',
-            //     'Меню “Постное” - это тщательный подбор ингредиентов: полное отсутствие продуктов животного происхождения, молоко из миндаля, овса, кокоса или гречки, правильное количество белков за счет тофу и импортных вегетарианских стейков.',
-            //     21,
-            //     '.menu .container' //сюда будут пушиться динамически созданные элементы верстки
-            // ).render();
+        .then(data => {
             data.forEach(({ img, altimg, title, descr, price }) => {
-                new MenuCard(img, altimg, title, descr, price, ".menu .container").render();
+                new Card(img, altimg, title, descr, price, ".menu .container").render();
             });
         });
 }
 
-module.exports = cards;
+export default cards;
