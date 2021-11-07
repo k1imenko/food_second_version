@@ -1,5 +1,6 @@
+import { openModal } from './modal';
+
 function timer(id, deadline) {
-    //Таймер
 
     // const deadline = '2021-10-20';
 
@@ -54,14 +55,14 @@ function timer(id, deadline) {
     setClock(id, deadline);
 
 
-    function showModalByScroll() { //при пролистывании страницы до конца будет показываться модальное окно
-        if (window.pageYOffset + document.documentElement.clientHeight >= document.documentElement.scrollHeight) {
-            openModal();
-            window.removeEventListener('scroll', showModalByScroll); //когда модальное окно показалось пользователю один раз, больше оно показываться при скролле сайта не будет 
-        }
-    }
+    // function showModalByScroll() { //при пролистывании страницы до конца будет показываться модальное окно
+    //     if (window.pageYOffset + document.documentElement.clientHeight >= document.documentElement.scrollHeight) {
+    //         openModal();
+    //         window.removeEventListener('scroll', showModalByScroll); //когда модальное окно показалось пользователю один раз, больше оно показываться при скролле сайта не будет 
+    //     }
+    // }
 
-    window.addEventListener('scroll', showModalByScroll);
+    // window.addEventListener('scroll', showModalByScroll);
 
 }
 

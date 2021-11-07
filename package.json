@@ -16,10 +16,22 @@
         "url": "https://github.com/k1imenko/food_second_version/issues"
     },
     "homepage": "https://github.com/k1imenko/food_second_version#readme",
+    "browserslist": [
+        "> 1%"
+    ],
     "devDependencies": {
+        "@babel/cli": "^7.15.7",
+        "@babel/core": "^7.15.8",
+        "@babel/preset-env": "^7.15.8",
+        "babel-loader": "^8.2.3",
+        "core-js": "^3.19.0",
         "json-server": "^0.16.3",
         "webpack": "^5.58.2",
         "webpack-cli": "^4.9.0"
     },
-    "dependencies": {}
+    "dependencies": {
+        "@babel/polyfill": "^7.12.1",
+        "es6-promise": "^4.2.8",
+        "nodelist-foreach-polyfill": "^1.2.0"
+    }
 }
